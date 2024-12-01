@@ -2,10 +2,10 @@ package aoc
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
+	"runtime"
 	"strings"
-
-	"github.com/alexchao26/advent-of-code-go/util"
 )
 
 func GetInput(day, year int, cookie string) {
@@ -19,8 +19,14 @@ func GetInput(day, year int, cookie string) {
 		panic("'Puzzle inputs differ by user' response")
 	}
 
+	_, callername, _, ok := runtime.Caller(1)
+	if !ok {
+		log.Fatalf("failed to get getting calling function")
+	}
+	dirname := filepath.Dir(callername)
+
 	// write to file
-	filename := filepath.Join(util.Dirname(), "../..", fmt.Sprintf("%d/day%02d/input.txt", year, day))
+	filename := filepath.Join(dirname, "../..", fmt.Sprintf("%d/day%02d/input.txt", year, day))
 	WriteToFile(filename, body)
 
 	fmt.Println("Wrote to file: ", filename)

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/alexchao26/advent-of-code-go/scripts/aoc"
+import "github.com/oscarhermoso/advent-of-code-go/scripts/aoc"
 
 func main() {
 	day, year, cookie := aoc.ParseFlags()

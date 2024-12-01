@@ -4,7 +4,8 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"log"
+	"math"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -36,26 +37,48 @@ func main() {
 }
 
 func part1(input string) int {
-	parsed := parseInput(input)
-	_ = parsed
+	left, right := parseInput(input)
 
-	return 0
+	ans := 0
+
+	for i := range left {
+		ans += int(math.Abs(float64(left[i] - right[i])))
+	}
+
+	return ans
 }
 
 func part2(input string) int {
-	parsed := parseInput(input)
-	_ = parsed
+	left, right := parseInput(input)
 
-	return 0
+	ans := 0
+
+	for _, l := range left {
+		multiplier := 0
+		for _, r := range right {
+			if l == r {
+				multiplier += 1
+			}
+		}
+		ans += l * multiplier
+	}
+
+	return ans
 }
 
-func parseInput(input string) (ans []int) {
+func parseInput(input string) (left []int, right []int) {
 	for _, line := range strings.Split(input, "\n") {
-		val, err := strconv.Atoi(line)
-		if err != nil {
-			log.Fatalf("error converting string to int: %v", err)
-		}
-		ans = append(ans, val)
+		fields := strings.Fields(line)
+
+		l, _ := strconv.Atoi(fields[0])
+		r, _ := strconv.Atoi(fields[1])
+
+		left = append(left, l)
+		right = append(right, r)
 	}
-	return ans
+
+	slices.Sort(left)
+	slices.Sort(right)
+
+	return left, right
 }

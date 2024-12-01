@@ -1,7 +1,6 @@
-![450 stars!](./450.png)
+##
 
-### Quick Note
-I started this in a pre-generics Go/Golang world. Maybe one day I'll come back and learn generics as they'd be quite useful here. But that's for future me.
+Fork of alexchao26/advent-of-code-go
 
 ## Running Locally
 ### Requirements
@@ -15,6 +14,17 @@ Use `go test -run RegExpToMatchFunctionNames .` to run examples and unit tests v
 Makefile should be fairly self-documenting. Alternatively you can run the binaries yourself via `go run` or `go build`.
 
 `make help` prints a help message.
+
+###  Load env file
+
+```sh
+cp .env.example .env
+# Add your AOC_SESSION_COOKIE token to .env
+```
+
+```sh
+eval export $(cat .env)
+```
 
 ### Make skeleton files
 ```sh

@@ -7,9 +7,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"text/template"
-
-	"github.com/alexchao26/advent-of-code-go/util"
 )
 
 //go:embed tmpls/*.go
@@ -30,8 +29,14 @@ func Run(day, year int) {
 		log.Fatalf("parsing tmpls directory: %s", err)
 	}
 
-	mainFilename := filepath.Join(util.Dirname(), "../../", fmt.Sprintf("%d/day%02d/main.go", year, day))
-	testFilename := filepath.Join(util.Dirname(), "../../", fmt.Sprintf("%d/day%02d/main_test.go", year, day))
+	_, filename, _, ok := runtime.Caller(1)
+	if !ok {
+		log.Fatalf("failed to get getting calling function")
+	}
+	dirname := filepath.Dir(filename)
+
+	mainFilename := filepath.Join(dirname, "../../", fmt.Sprintf("%d/day%02d/main.go", year, day))
+	testFilename := filepath.Join(dirname, "../../", fmt.Sprintf("%d/day%02d/main_test.go", year, day))
 
 	err = os.MkdirAll(filepath.Dir(mainFilename), os.ModePerm)
 	if err != nil {

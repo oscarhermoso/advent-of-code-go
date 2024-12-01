@@ -1,4 +1,4 @@
-module github.com/alexchao26/advent-of-code-go
+module github.com/oscarhermoso/advent-of-code-go
 
 go 1.22
 

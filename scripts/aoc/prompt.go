@@ -3,12 +3,12 @@ package aoc
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"golang.org/x/net/html"
-
-	"github.com/alexchao26/advent-of-code-go/util"
 )
 
 func GetPrompt(day, year int, cookie string) {
@@ -21,8 +21,14 @@ func GetPrompt(day, year int, cookie string) {
 	// parse the dang html
 	prompt := parseHTML(body)
 
+	_, callername, _, ok := runtime.Caller(1)
+	if !ok {
+		log.Fatalf("failed to get getting calling function")
+	}
+	dirname := filepath.Dir(callername)
+
 	// write to file
-	filename := filepath.Join(util.Dirname(), "../../", fmt.Sprintf("%d/day%02d/prompt.md", year, day))
+	filename := filepath.Join(dirname, "../../", fmt.Sprintf("%d/day%02d/prompt.md", year, day))
 	WriteToFile(filename, []byte(prompt))
 
 	fmt.Println("Wrote prompt to file: ", filename)
