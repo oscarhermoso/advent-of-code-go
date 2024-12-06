@@ -55,7 +55,7 @@ func Test_part2(t *testing.T) {
 		{
 			name:  "actual",
 			input: input,
-			want:  0,
+			want:  1976,
 		},
 	}
 	for _, tt := range tests {

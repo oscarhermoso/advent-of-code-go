@@ -131,7 +131,7 @@ func part2(input string) int {
 
 	for yPos, line := range lines {
 		for xPos, loc := range line {
-			if (loc == 'X' || loc == '.') && !(xPos == start[0] && yPos == start[1]) {
+			if (loc == 'X') && !(xPos == start[0] && yPos == start[1]) {
 				line := []rune(lines[yPos])
 				line[xPos] = '#'
 				lines[yPos] = string(line)
@@ -145,6 +145,14 @@ func part2(input string) int {
 					if dir == '^' {
 						if y-1 >= 0 && lines[y-1][x] == '#' {
 							dir = '>'
+							loc := fmt.Sprintf("%v|%v|%v", x, y, dir)
+							v := visisted[loc]
+							if v {
+								blocks += 1
+								break
+							}
+							visisted[loc] = true
+
 						} else {
 							y -= 1
 						}
@@ -167,15 +175,6 @@ func part2(input string) int {
 							x -= 1
 						}
 					}
-
-					loc := fmt.Sprintf("%v|%v|%v", x, y, dir)
-					v := visisted[loc]
-					if v {
-						// fmt.Printf("Found location: %v, %v\n", xPos, yPos)
-						blocks += 1
-						break
-					}
-					visisted[loc] = true
 				}
 
 				line = []rune(lines[yPos])
