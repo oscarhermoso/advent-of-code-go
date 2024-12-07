@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 )
@@ -61,35 +60,14 @@ func parseInput(input string) (ans []int64) {
 	for _, line := range strings.Split(input, "\n") {
 		equation := strings.Split(line, ":")
 		target, _ := strconv.Atoi(equation[0])
-		var nums []int
+		var nums []int64
 		fields := strings.Fields(equation[1])
 		for _, field := range fields {
 			num, _ := strconv.Atoi(field)
-			nums = append(nums, num)
+			nums = append(nums, int64(num))
 		}
-
-		maxCombinations := int64(math.Pow(2, float64(len(fields))))
-		var i int64
-
-	outer:
-		for i = 0; i < maxCombinations; i++ {
-			var total int64 = 0
-			target64 := int64(target)
-			for j, num := range nums {
-				if (i & (1 << j)) != 0 {
-					total *= int64(num)
-				} else {
-					total += int64(num)
-				}
-
-				if total >= target64 {
-					if total == target64 && j == len(nums)-1 {
-						ans = append(ans, target64)
-						break outer
-					}
-					continue
-				}
-			}
+		if dfs(int64(target), false, nums...) {
+			ans = append(ans, int64(target))
 		}
 	}
 	return ans
@@ -99,43 +77,37 @@ func parseInput2(input string) (ans []int64) {
 	for _, line := range strings.Split(input, "\n") {
 		equation := strings.Split(line, ":")
 		target, _ := strconv.Atoi(equation[0])
-		var nums []int
+		var nums []int64
 		fields := strings.Fields(equation[1])
 		for _, field := range fields {
 			num, _ := strconv.Atoi(field)
-			nums = append(nums, num)
+			nums = append(nums, int64(num))
 		}
-
-		maxCombinations := int64(math.Pow(3, float64(len(fields))))
-		var i int64
-
-	outer:
-		for i = 0; i < maxCombinations; i++ {
-			var total int64 = 0
-			target64 := int64(target)
-			for j, num := range nums {
-				operator := (i / (int64(math.Pow(3, float64(j))))) % 3
-
-				if operator == 2 {
-					total *= int64(num)
-				} else if operator == 1 {
-					total += int64(num)
-				} else if operator == 0 {
-					total, _ = strconv.ParseInt(fmt.Sprintf("%v%v", total, num), 10, 64)
-					// fmt.Println(total)
-				} else {
-					panic("unreachable")
-				}
-
-				if total >= target64 {
-					if total == target64 && j == len(nums)-1 {
-						ans = append(ans, target64)
-						break outer
-					}
-					continue
-				}
-			}
+		if dfs(int64(target), true, nums...) {
+			ans = append(ans, int64(target))
 		}
 	}
 	return ans
+}
+
+func dfs(target int64, part2 bool, nums ...int64) bool {
+	if len(nums) == 1 {
+		return nums[0] == target
+	}
+	if nums[0] > target {
+		return false
+	}
+
+	if success := dfs(target, part2, append([]int64{nums[0] * nums[1]}, nums[2:]...)...); success {
+		return success
+	}
+	if success := dfs(target, part2, append([]int64{nums[0] + nums[1]}, nums[2:]...)...); success {
+		return success
+	}
+	if part2 {
+		numNum, _ := strconv.ParseInt(fmt.Sprintf("%v%v", nums[0], nums[1]), 10, 64)
+		return dfs(target, part2, append([]int64{numNum}, nums[2:]...)...)
+	}
+
+	return false
 }
