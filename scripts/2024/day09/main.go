@@ -83,9 +83,10 @@ func parseInput(input string) int {
 		head++
 
 		for i := 0; i < spaceSize; i++ {
-			if tail < head-2 {
-				break
-			} else if tailSize == 0 {
+			if tailSize == 0 {
+				if tail <= head {
+					break
+				}
 				tailSize = ans[tail]
 				tail -= 2
 				tailId--
