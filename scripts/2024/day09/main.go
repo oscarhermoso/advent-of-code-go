@@ -35,37 +35,20 @@ func main() {
 }
 
 func part1(input string) int {
-	parsed := parseInput(input)
-	return parsed
-}
-
-func part2(input string) int {
-	parsed := parseInput(input)
-	_ = parsed
-
-	return 0
-}
-
-func parseInput(input string) int {
-	var ans []int
-
-	for _, char := range input {
-		n, _ := strconv.Atoi(string(char))
-		ans = append(ans, n)
-	}
+	nums := parseInput(input)
 
 	pos := 0
 	head := 0
 	headId := 0
-	tail := len(ans) - 1
-	tailId := len(ans)/2 + 1
+	tail := len(nums) - 1
+	tailId := len(nums)/2 + 1
 	tailSize := 0
 	checksum := 0
 	debug := ""
 	// alreadyDone := true
 
 	for head <= tail {
-		fileSize := ans[head]
+		fileSize := nums[head]
 		head++
 
 		for i := 0; i < fileSize; i++ {
@@ -79,7 +62,7 @@ func parseInput(input string) int {
 			break
 		}
 
-		spaceSize := ans[head]
+		spaceSize := nums[head]
 		head++
 
 		for i := 0; i < spaceSize; i++ {
@@ -87,7 +70,7 @@ func parseInput(input string) int {
 				if tail <= head {
 					break
 				}
-				tailSize = ans[tail]
+				tailSize = nums[tail]
 				tail -= 2
 				tailId--
 			}
@@ -103,13 +86,75 @@ func parseInput(input string) int {
 		debug = fmt.Sprintf("%s%d", debug, tailId)
 	}
 
-	if debug == "0099811188827773336446555566" {
-		print("input matched!\n")
-	} else if len(debug) < 1000 {
-		fmt.Printf("RUH ROH, no matchy")
-		fmt.Printf("should be:\n0099811188827773336446555566\n")
-		fmt.Printf("but was:\n%s\n", debug)
+	return checksum
+}
+
+func part2(input string) int {
+	nums := parseInput(input)
+
+	pos := 0
+	head := 0
+	headId := 0
+	tail := len(nums) - 1
+	tailId := len(nums)/2 + 1
+	tailSize := 0
+	checksum := 0
+	debug := make([]byte, len(nums)*10)
+
+	for i := range debug {
+		debug[i] = byte('.')
 	}
 
+	for head < len(nums)-1 {
+		fileSize := nums[head]
+		head++
+		for i := 0; i < fileSize; i++ {
+			checksum += pos * headId
+			debug[pos] = strconv.Itoa(headId)[0]
+			pos++
+		}
+		headId++
+
+		fmt.Println(string(debug))
+
+		spaceSize := nums[head]
+		head++
+
+		for i := 0; i < spaceSize; i++ {
+			if tailSize == 0 {
+				for j := tail; j >= head; j -= 2 {
+					if nums[j] != 0 && spaceSize-i >= nums[j] {
+						tailSize = nums[j]
+						nums[j] = 0
+						tailId = j / 2
+						break
+					} else {
+						tailId = 0
+					}
+				}
+			}
+
+			if tailId != 0 {
+				debug[pos] = strconv.Itoa(tailId)[0]
+				checksum += pos * tailId
+				tailSize--
+			}
+			pos++
+		}
+	}
+
+	fmt.Println(string(debug))
+
 	return checksum
+}
+
+func parseInput(input string) []int {
+	var ans []int
+
+	for _, char := range input {
+		n, _ := strconv.Atoi(string(char))
+		ans = append(ans, n)
+	}
+
+	return ans
 }

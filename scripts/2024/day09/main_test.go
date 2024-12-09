@@ -20,14 +20,13 @@ func Test_part1(t *testing.T) {
 		{
 			name:  "actual",
 			input: input,
-			want:  0,
 			// not 6322331603222
 			// not 6321806917733
 			// not 6323903988951
 			// not 6325741123663
 			// not 6323903988951
 			// not 6324166171434
-			//     6323641412437
+			want: 6323641412437,
 		},
 	}
 	for _, tt := range tests {
@@ -48,7 +47,7 @@ func Test_part2(t *testing.T) {
 		{
 			name:  "example",
 			input: example,
-			want:  0,
+			want:  2858,
 		},
 		// {
 		// 	name:  "actual",
