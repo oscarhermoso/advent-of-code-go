@@ -125,8 +125,12 @@ func part2(input string) int {
 				for j := tail; j >= head; j -= 2 {
 					if nums[j] != 0 && spaceSize-i >= nums[j] {
 						tailSize = nums[j]
+						if j+1 < len(nums) {
+							nums[j+1] += tailSize
+						}
 						nums[j] = 0
 						tailId = j / 2
+						tail -= 2
 						break
 					} else {
 						tailId = 0
