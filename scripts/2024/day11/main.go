@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -36,26 +35,34 @@ func main() {
 }
 
 func part1(input string) int {
-	parsed := parseInput(input)
-	_ = parsed
+	var stones, nextStones []string
+	stones = strings.Fields(input)
 
-	return 0
+	for i := 0; i < 25; i++ {
+		for _, stone := range stones {
+			if stone == "0" {
+				nextStones = append(nextStones, "1")
+			} else if len(stone)%2 == 0 {
+				stone0, _ := strconv.ParseInt(stone[:len(stone)/2], 10, 64)
+				stone1, _ := strconv.ParseInt(stone[len(stone)/2:], 10, 64)
+				nextStones = append(nextStones, fmt.Sprint(stone0))
+				nextStones = append(nextStones, fmt.Sprint(stone1))
+			} else {
+				stone0, _ := strconv.ParseInt(stone, 10, 64)
+				nextStones = append(nextStones, fmt.Sprint(stone0*2024))
+			}
+		}
+		// fmt.Println(nextStones)
+		stones = nextStones
+		nextStones = []string{}
+	}
+
+	return len(stones)
 }
 
 func part2(input string) int {
-	parsed := parseInput(input)
-	_ = parsed
+	// parsed := parseInput(input)
+	// _ = parsed
 
 	return 0
-}
-
-func parseInput(input string) (ans []int) {
-	for _, line := range strings.Split(input, "\n") {
-		val, err := strconv.Atoi(line)
-		if err != nil {
-			log.Fatalf("error converting string to int: %v", err)
-		}
-		ans = append(ans, val)
-	}
-	return ans
 }
