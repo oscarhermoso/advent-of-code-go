@@ -35,34 +35,58 @@ func main() {
 }
 
 func part1(input string) int {
-	var stones, nextStones []string
-	stones = strings.Fields(input)
+	ans := 0
+	stones := strings.Fields(input)
+	blinks := 25
 
-	for i := 0; i < 25; i++ {
-		for _, stone := range stones {
-			if stone == "0" {
-				nextStones = append(nextStones, "1")
-			} else if len(stone)%2 == 0 {
-				stone0, _ := strconv.ParseInt(stone[:len(stone)/2], 10, 64)
-				stone1, _ := strconv.ParseInt(stone[len(stone)/2:], 10, 64)
-				nextStones = append(nextStones, fmt.Sprint(stone0))
-				nextStones = append(nextStones, fmt.Sprint(stone1))
-			} else {
-				stone0, _ := strconv.ParseInt(stone, 10, 64)
-				nextStones = append(nextStones, fmt.Sprint(stone0*2024))
-			}
-		}
-		// fmt.Println(nextStones)
-		stones = nextStones
-		nextStones = []string{}
+	var cache []map[string]int
+	for i := 0; i < blinks; i++ {
+		cache = append(cache, make(map[string]int))
 	}
-
-	return len(stones)
+	for _, stone := range stones {
+		ans += dfs(stone, cache, blinks)
+	}
+	return ans
 }
 
 func part2(input string) int {
-	// parsed := parseInput(input)
-	// _ = parsed
+	ans := 0
+	stones := strings.Fields(input)
+	blinks := 75
 
-	return 0
+	var cache []map[string]int
+	for i := 0; i < blinks; i++ {
+		cache = append(cache, make(map[string]int))
+	}
+	for _, stone := range stones {
+		ans += dfs(stone, cache, blinks)
+	}
+	return ans
+}
+
+func dfs(stone string, cache []map[string]int, i int) (ans int) {
+	if i == 0 {
+		return 1
+	}
+	i -= 1
+	if cached, ok := cache[i][stone]; ok {
+		return cached
+	}
+	if stone == "0" {
+		ans = dfs("1", cache, i)
+		cache[i][stone] = ans
+		return ans
+	} else if len(stone)%2 == 0 {
+		l := stone[:len(stone)/2]
+		r, _ := strconv.Atoi(stone[len(stone)/2:])
+		ans += dfs(l, cache, i)
+		ans += dfs(fmt.Sprint(r), cache, i)
+		cache[i][stone] = ans
+		return ans
+	} else {
+		mult, _ := strconv.ParseInt(stone, 10, 64)
+		ans = dfs(fmt.Sprint(mult*2024), cache, i)
+		cache[i][stone] = ans
+		return ans
+	}
 }
