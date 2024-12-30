@@ -49,12 +49,50 @@ func part2(input string) int {
 	price := 0
 	for _, region := range regions {
 		price += region.area * len(region.sides)
-		fmt.Printf("%v\n", region.sides)
+		// fmt.Printf("%c (%d): %v\n", region.char, len(region.sides), region.sides)
 	}
+
+	var debug [][]rune
+
+	lines := strings.Split(input, "\n")
+	for _, line := range lines {
+		debug = append(debug, []rune(strings.Repeat(" ", len(line)*2+1)))
+		debugLine := make([]rune, len(lines[0])*2+1)
+		for i, char := range line {
+			debugLine[i*2] = ' '
+			debugLine[i*2+1] = char
+		}
+		debugLine[len(line)*2] = ' '
+		debug = append(debug, debugLine)
+	}
+	debug = append(debug, []rune(strings.Repeat(" ", len(debug[0]))))
+
+	// for _, reg := range regions {
+	// 	for _, side := range reg.sides {
+	// 		// for x := side.Min.X * 2; x < side.Max.X*2; x++ {
+	// 		// 	debug[side.Min.Y][x] = '-'
+	// 		// }
+	// 		// for y := side.Min.Y * 2; y < side.Max.Y*2; y++ {
+	// 		// 	debug[y][side.Min.X] = '|'
+	// 		// }
+
+	// 		debug[side.Min.Y*2][side.Min.X*2] = '+'
+	// 		debug[side.Max.Y*2][side.Max.X*2] = '+'
+	// 	}
+	// }
+
+	for _, debugLine := range debug {
+		fmt.Printf("%s (%d)\n", string(debugLine), len(debugLine))
+	}
+
 	return price
 }
 
+var regionId int = 0
+
 type Region struct {
+	id        int
+	char      rune
 	points    []image.Point
 	perimeter int
 	area      int
@@ -83,7 +121,8 @@ func parseInput(input string) (regions []Region) {
 			if _, ok := points[pos]; ok {
 				continue
 			}
-			region := Region{[]image.Point{pos}, 0, 0, []image.Rectangle{}}
+			region := Region{regionId, char, []image.Point{pos}, 0, 0, []image.Rectangle{}}
+			regionId++
 			for i := 0; i < len(region.points); i++ {
 				pos := region.points[i]
 				region.area += 1
@@ -101,7 +140,21 @@ func parseInput(input string) (regions []Region) {
 					}
 				}
 			}
-			region.sides = mergeSides(region.sides)
+			mobiusPosts := make(map[image.Point]struct{})
+			for _, pos := range region.points {
+				if post := pos.Add(image.Pt(1, 1)); slices.Contains(region.points, post) &&
+					(!slices.Contains(region.points, pos.Add(image.Pt(0, 1))) && //    A|B
+						!slices.Contains(region.points, pos.Add(image.Pt(1, 0)))) { // C|A
+					mobiusPosts[post] = struct{}{}
+					// fmt.Printf("found mobius fence: %s", post)
+				} else if post := pos.Add(image.Pt(-1, 1)); slices.Contains(region.points, post) &&
+					(!slices.Contains(region.points, pos.Add(image.Pt(-1, 0))) && //   B|A
+						!slices.Contains(region.points, pos.Add(image.Pt(0, 1)))) { // A|C
+					mobiusPosts[post] = struct{}{}
+					// fmt.Printf("found mobius fence: %s", post)
+				}
+			}
+			region.sides = mergeSides(region.sides, mobiusPosts)
 			regions = append(regions, region)
 		}
 	}
@@ -109,58 +162,40 @@ func parseInput(input string) (regions []Region) {
 	return regions
 }
 
-func mergeSides(sides []image.Rectangle) (mergedSides []image.Rectangle) {
+func mergeSides(sides []image.Rectangle, mobiusPosts map[image.Point]struct{}) (mergedSides []image.Rectangle) {
 	if len(sides) < 2 {
 		return sides
 	}
 	if len(sides) >= 2 {
-		mergedSides = append(mergedSides, mergeSides(sides[:len(sides)/2])...)
-		mergedSides = append(mergedSides, mergeSides(sides[len(sides)/2:])...)
+		mergedSides = append(mergedSides, mergeSides(sides[:len(sides)/2], mobiusPosts)...)
+		mergedSides = append(mergedSides, mergeSides(sides[len(sides)/2:], mobiusPosts)...)
 	}
-
 	remaining := true
 mergeLoop:
 	for remaining {
-		for i, side1 := range sides {
-			for j, side2 := range sides {
+		remaining = false
+		for i, side1 := range mergedSides {
+			for j, side2 := range mergedSides {
 				if i == j {
 					continue
 				}
-
-				if (side1.Min.Eq(side2.Max) && (side1.Max.X == side2.Min.X || side1.Max.Y == side2.Min.Y)) ||
-					(side1.Min.Eq(side2.Min) && (side1.Max.X == side2.Max.X || side1.Max.Y == side2.Max.Y)) ||
-					(side1.Max.Eq(side2.Max) && (side1.Min.X == side2.Min.X || side1.Min.Y == side2.Min.Y)) {
-
-					fmt.Printf("mergerino %s and %s\n", side1, side2)
-
-					if side1.Min.X > side2.Min.X {
-						side1.Min.X = side2.Min.X
-					}
-					if side1.Min.Y > side2.Min.Y {
-						side1.Min.Y = side2.Min.Y
-					}
-					if side1.Max.X < side2.Max.X {
-						side1.Max.X = side2.Max.X
-					}
-					if side1.Max.Y < side2.Max.Y {
-						side1.Max.Y = side2.Max.Y
+				if side1.Max.Eq(side2.Min) && (side1.Min.X == side2.Max.X || side1.Min.Y == side2.Max.Y) ||
+					side1.Max.Eq(side2.Max) && (side1.Min.X == side2.Min.X || side1.Min.Y == side2.Min.Y) ||
+					side1.Min.Eq(side2.Min) && (side1.Max.X == side2.Max.X || side1.Max.Y == side2.Max.Y) {
+					// guard mobius fence
+					if _, ok := mobiusPosts[side1.Max]; ok {
+						continue
 					}
 
-					fmt.Printf("merged into %s\n", side1)
-
-					sides[i] = side1
-					mergedSides = append(mergedSides, sides[:j]...)
-					mergedSides = append(mergedSides, sides[j+1:]...)
-
-					fmt.Printf("sides are %v\n", mergedSides)
-					sides = mergedSides
-					mergedSides = []image.Rectangle{}
+					// merge
+					mergedSides[i] = image.Rect(side1.Min.X, side1.Min.Y, side2.Max.X, side2.Max.Y)
+					mergedSides[j] = mergedSides[len(mergedSides)-1]
+					mergedSides = mergedSides[:len(mergedSides)-1]
+					remaining = true
 					continue mergeLoop
 				}
 			}
 		}
-		remaining = false
 	}
-	// fmt.Printf("done mergin sides\n")
-	return sides
+	return mergedSides
 }
