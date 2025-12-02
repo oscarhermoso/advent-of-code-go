@@ -1,4 +1,3 @@
-.vscode/*
 input*.txt
 !scripts/skeleton/tmpls/input.txt
 prompt.md
