@@ -30,23 +30,40 @@ func main() {
 	}
 }
 
-func parseInput(input string) (ans []int) {
+func parseInput(input string) (ans [][]int) {
 	for _, line := range strings.Split(input, "\n") {
-		var arg1, arg2 int
-		_, err := fmt.Sscanf(line, "<format>", &arg1, &arg2)
-		if err != nil {
-			log.Fatalf("failed to parse input: %v", err)
+		var positions []int
+		for i, char := range line {
+			if char == '|' {
+				positions = append(positions, i)
+			}
+			
 		}
-		ans = append(ans, arg1, arg2)
+		ans = append(ans, positions)
 	}
 	return ans
 }
 
 func part1(input string) int {
 	parsed := parseInput(input)
-	_ = parsed
 
-	return 0
+	var prev map[string]bool
+	m := make(map[string]bool)
+	m[strings.IndexRune('S')] = true
+
+	for i, line := range parsed {
+		prev = m
+		m := make(map[string]bool)
+		for pos := range prev {
+			if slices.Contains(line, pos) {
+				m[pos+1] = true
+				m[pos-1] = true
+			} else {
+				m[pos] = true
+		}
+	}
+
+	return len(m)
 }
 
 func part2(input string) int {
