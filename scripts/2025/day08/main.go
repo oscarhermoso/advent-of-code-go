@@ -75,32 +75,24 @@ func part1(input string) int {
 
 		if okA && okB && !slices.Contains(circuitA, b) && !slices.Contains(circuitB, a) {
 			newCircuit := append(circuitA, circuitB...)
-			// len1 := len(newCircuit)
 			newCircuit = slices.Compact(newCircuit)
-			// len2 := len(newCircuit)
-			// if len1 > len2 {
 			for _, coord := range newCircuit {
 				circuits[coord] = newCircuit
 			}
-			// joined += 1
-			// }
 		} else if !okA && !okB {
 			newCircuit := []string{a, b}
 			circuits[a] = newCircuit
 			circuits[b] = newCircuit
-			// joined += 1
 		} else if !okA && !slices.Contains(circuitB, a) {
 			newCircuit := append(circuitB, a)
 			for _, coord := range newCircuit {
 				circuits[coord] = newCircuit
 			}
-			// joined += 1
 		} else if !okB && !slices.Contains(circuitA, b) {
 			newCircuit := append(circuitA, b)
 			for _, coord := range newCircuit {
 				circuits[coord] = newCircuit
 			}
-			// joined += 1
 		}
 		joined += 1
 		if joined >= 1000 {
@@ -129,9 +121,48 @@ func part1(input string) int {
 
 func part2(input string) int {
 	parsed := parseInput(input)
-	_ = parsed
+	var pairs []Pair
 
-	return 0
+	for i, a := range parsed[:len(parsed)-1] {
+		for _, b := range parsed[i+1:] {
+			pairs = append(pairs, Pair{&a, &b, Distance3D(a, b)})
+		}
+	}
+
+	slices.SortFunc(pairs, func(a Pair, b Pair) int {
+		return cmp.Compare(a.distance, b.distance)
+	})
+
+	circuits := make(map[string][]string)
+
+	for _, pair := range pairs {
+		a := fmt.Sprintf("%v", *pair.a)
+		b := fmt.Sprintf("%v", *pair.b)
+		circuitA, okA := circuits[a]
+		circuitB, okB := circuits[b]
+		var newCircuit []string
+
+		if okA && okB && !slices.Contains(circuitA, b) && !slices.Contains(circuitB, a) {
+			newCircuit = append(circuitA, circuitB...)
+			newCircuit = slices.Compact(newCircuit)
+		} else if !okA && !okB {
+			newCircuit = []string{a, b}
+		} else if !okA && !slices.Contains(circuitB, a) {
+			newCircuit = append(circuitB, a)
+		} else if !okB && !slices.Contains(circuitA, b) {
+			newCircuit = append(circuitA, b)
+		}
+
+		for _, coord := range newCircuit {
+			circuits[coord] = newCircuit
+		}
+
+		if len(newCircuit) == len(parsed) {
+			return (*pair.a)[0] * (*pair.b)[0]
+		}
+	}
+
+	return -1
 }
 
 func Distance3D(a []int, b []int) float64 {
